@@ -1,0 +1,40 @@
+// CONFIGURAÇÕES - PREENCHA COM OS SEUS DADOS
+const RPC_URL = "https://mainnet.base.org"; 
+const PRIVATE_KEY = "SUA_CHAVE_PRIVADA_DA_METAMASK_AQUI"; 
+const CONTRACT_ADDRESS = "ENDERECO_DO_CONTRATO_QUE_VOCE_DEPLOIOU"; // Copie o endereço do LogGeral do Remix
+
+// ABI do contrato (informa ao script quais funções existem)
+const abi = [
+    "function contractRegistrar(string memory _novaMensagem) public"
+];
+
+async function main() {
+    // 1. Conecta na rede Base
+    const provider = new ethers.JsonRpcProvider(RPC_URL);
+    
+    // 2. Conecta a sua carteira
+    const wallet = new ethers.Wallet(PRIVATE_KEY, provider);
+    
+    // 3. Instancia o contrato
+    const contrato = new ethers.Contract(CONTRACT_ADDRESS, abi, wallet);
+    
+    console.log("Iniciando transação na rede Base...");
+    
+    try {
+        // Gera uma mensagem dinâmica usando a data e hora do momento do envio
+        const mensagem = `Atualizacao de rotina - ${new Date().toISOString()}`;
+        
+        // Envia a transação para a blockchain
+        const tx = await contrato.contractRegistrar(mensagem);
+        console.log(`Transação enviada com sucesso! Hash: ${tx.hash}`);
+        
+        // Espera a rede Base processar e confirmar o bloco
+        await tx.wait();
+        console.log("Transação confirmada no BaseScan! Contrato aquecido.");
+        
+    } catch (error) {
+        console.error("Erro ao executar a transação:", error);
+    }
+}
+
+main();
